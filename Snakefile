@@ -57,4 +57,4 @@ rule compare_count_tables:
     conda:
         "envs/r.yaml"
     script:
-        "compareCountTables.R"
+        "scripts/compareCountTables.R"

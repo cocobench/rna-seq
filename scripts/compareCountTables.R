@@ -12,6 +12,9 @@ output_path <- snakemake@output[[1]] #"output.tsv"
 CT <- read.csv(CT_path, sep="\t", row.names = "feature")
 GT <- read.csv(GT_path, sep="\t", row.names = "feature")
 
+# restrict to rownames (genes) of GT
+CT <- CT[rownames(GT), ]
+
   #mean gene SD
   #SD_GT <- apply(GT, 1, sd)
   #SD_CT <- apply(CT, 1, sd)
