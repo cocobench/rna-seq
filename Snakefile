@@ -4,20 +4,23 @@ from snakemake.remote import HTTP
 https = HTTP.RemoteProvider()
 
 configfile: "config.yaml"
-samples = pd.read_table("samples.tsv", index_col=0)
+samples = pd.read_table(config["samples"], index_col=0)
 
 ############# Helpers #######################
 
 get_bam = lambda wildcards: samples.loc[wildcards.sample, "bam"]
 get_fastq = lambda wildcards: samples.loc[wildcards.sample, ["fq1", "fq2"]]
 
-############# Generate dataset ##############
+
+############ Targets ########################
 
 rule dataset:
     input:
         expand("subsampled/{sample}-{group}.R{read}.fastq.gz",
                sample=samples.index, read=[1,2], group=["A", "B"])
 
+
+############# Generate dataset ##############
 
 rule subsample:
     input:
@@ -41,3 +44,17 @@ rule subsample:
         "--outputR1A {output.a[0]} --outputR2A {output.a[1]} "
         "--outputR1B {output.b[0]} --outputR2B {output.b[1]} "
         "--deviation {params.sd} --seed {params.seed}"
+
+
+############# Metrics #######################
+
+rule compare_count_tables:
+    input:
+        counts="results/{pipeline}/counts.tsv",
+        truth="resources/known-counts.tsv"  # TODO we need to obtain these
+    output:
+        "metrics/{pipeline}-vs-truth.tsv"
+    conda:
+        "envs/r.yaml"
+    script:
+        "compareCountTables.R"
