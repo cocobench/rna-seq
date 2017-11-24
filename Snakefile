@@ -24,7 +24,8 @@ rule subsample:
         bam=get_bam,
         fastq=get_fastq,
         bed=config["subsampling"]["rates"],
-        jar=os.path.join(os.path.dirname(workflow.snakefile), "resources/DownsampleRegion-assembly-0.1-SNAPSHOT.jar")
+        jar=os.path.join(os.path.dirname(workflow.snakefile),
+                         "resources/DownsampleRegion-assembly-0.1-SNAPSHOT.jar")
     output:
         a=expand("subsampled/{{sample}}-A.R{read}.fastq.gz", read=[1, 2]),
         b=expand("subsampled/{{sample}}-B.R{read}.fastq.gz", read=[1, 2])
