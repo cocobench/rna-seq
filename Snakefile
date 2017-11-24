@@ -1,7 +1,10 @@
 import pandas as pd
+import snakemake.remote.HTTP
 
+https = HTTP.RemoteProvider()
+
+configfile: "config.yaml"
 samples = pd.read_table("samples.tsv", index_col=0)
-
 
 ############# Generate dataset ##############
 
@@ -14,7 +17,10 @@ rule subsample:
     input:
         bam=get_bam,
         fastq=get_fastq,
-        bed=config["subsampling"]["rates"]
+        bed=config["subsampling"]["rates"],
+        jar=https.remote("https://github.com/biopet/downsampleregions/"
+                         "releases/download/v0.1/"
+                         "DownsampleRegion-assembly-0.1-SNAPSHOT.jar")
     output:
         a=expand("subsampled/{{sample}}-A.R{read}.fastq", read=[1, 2]),
         b=expand("subsampled/{{sample}}-B.R{read}.fastq", read=[1, 2])
@@ -24,7 +30,7 @@ rule subsample:
     conda:
         "envs/java.yaml"
     shell:
-        "java -jar --bamFile {input.bam} --bedFile {input.bed} "
+        "java -jar {input.jar} --bamFile {input.bam} --bedFile {input.bed} "
         "--inputR1 {input.fastq[0]} --inputR2 {input.fastq[1]} "
         "--outputR1A {output.a[0]} --outputR2A {output.a[1]} "
         "--outputR1B {output.b[0]} --outputR2B {output.b[1]} "
