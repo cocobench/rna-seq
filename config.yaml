@@ -1,0 +1,5 @@
+subsampling:
+  # path to bed file with sampling rates
+  rates: resources/sampling-rates.bed
+  # standard deviation applied to each sampling rate before doing the sampling
+  sd: 0.1
