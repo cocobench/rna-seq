@@ -22,13 +22,14 @@ rule subsample:
                          "releases/download/v0.1/"
                          "DownsampleRegion-assembly-0.1-SNAPSHOT.jar")
     output:
-        a=expand("subsampled/{{sample}}-A.R{read}.fastq", read=[1, 2]),
-        b=expand("subsampled/{{sample}}-B.R{read}.fastq", read=[1, 2])
+        a=expand("subsampled/{{sample}}-A.R{read}.fastq.gz", read=[1, 2]),
+        b=expand("subsampled/{{sample}}-B.R{read}.fastq.gz", read=[1, 2])
     params:
         sd=config["subsampling"]["sd"],
         seed=lambda wildcards: hash(wildcards.sample)
     conda:
         "envs/java.yaml"
+    threads: 2
     shell:
         "java -jar {input.jar} --bamFile {input.bam} --bedFile {input.bed} "
         "--inputR1 {input.fastq[0]} --inputR2 {input.fastq[1]} "
