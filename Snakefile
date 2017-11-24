@@ -1,16 +1,22 @@
 import pandas as pd
-import snakemake.remote.HTTP
+from snakemake.remote import HTTP
 
 https = HTTP.RemoteProvider()
 
 configfile: "config.yaml"
 samples = pd.read_table("samples.tsv", index_col=0)
 
+############# Helpers #######################
+
+get_bam = lambda wildcards: samples.loc[wildcards.sample, "bam"]
+get_fastq = lambda wildcards: samples.loc[wildcards.sample, ["fq1", "fq2"]]
+
 ############# Generate dataset ##############
 
 rule dataset:
     input:
-        expand("downsampled/{sample}.R{read}.fastq", sample=samples, read=[1,2])
+        expand("subsampled/{sample}-{group}.R{read}.fastq.gz",
+               sample=samples.index, read=[1,2], group=["A", "B"])
 
 
 rule subsample:
@@ -18,9 +24,7 @@ rule subsample:
         bam=get_bam,
         fastq=get_fastq,
         bed=config["subsampling"]["rates"],
-        jar=https.remote("https://github.com/biopet/downsampleregions/"
-                         "releases/download/v0.1/"
-                         "DownsampleRegion-assembly-0.1-SNAPSHOT.jar")
+        jar=os.path.join(os.path.dirname(workflow.snakefile), "resources/DownsampleRegion-assembly-0.1-SNAPSHOT.jar")
     output:
         a=expand("subsampled/{{sample}}-A.R{read}.fastq.gz", read=[1, 2]),
         b=expand("subsampled/{{sample}}-B.R{read}.fastq.gz", read=[1, 2])
