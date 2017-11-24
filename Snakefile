@@ -21,6 +21,8 @@ rule subsample:
     params:
         sd=config["subsampling"]["sd"],
         seed=lambda wildcards: hash(wildcards.sample)
+    conda:
+        "envs/java.yaml"
     shell:
         "java -jar --bamFile {input.bam} --bedFile {input.bed} "
         "--inputR1 {input.fastq[0]} --inputR2 {input.fastq[1]} "
